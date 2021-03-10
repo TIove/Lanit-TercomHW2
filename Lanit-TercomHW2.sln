@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{32E0BFB4-6947-4EEF-9F08-896601374FF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broker", "Broker\Broker.csproj", "{DAE3D0AC-E504-465D-B35A-FB4FE0200043}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32E0BFB4-6947-4EEF-9F08-896601374FF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32E0BFB4-6947-4EEF-9F08-896601374FF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32E0BFB4-6947-4EEF-9F08-896601374FF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32E0BFB4-6947-4EEF-9F08-896601374FF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAE3D0AC-E504-465D-B35A-FB4FE0200043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAE3D0AC-E504-465D-B35A-FB4FE0200043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAE3D0AC-E504-465D-B35A-FB4FE0200043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAE3D0AC-E504-465D-B35A-FB4FE0200043}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
