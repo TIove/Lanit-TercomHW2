@@ -1,5 +1,7 @@
 using DataAccess.Commands;
 using DataAccess.Commands.Interfaces;
+using DataAccess.Mapper;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,18 +11,6 @@ namespace DataAccess
 {
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllers();
-            services.AddTransient<IDeleteBookCommand, DeleteBookCommand>();
-            services.AddTransient<IPostBookCommand, PostBookCommand>();
-            services.AddTransient<IGetBookCommand, GetBookCommand>();
-            services.AddTransient<IUpdateBookCommand, UpdateBookCommand>();
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -34,10 +24,38 @@ namespace DataAccess
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers();
+            ConfigureMassTransit(services);
+            services.AddTransient<IBookMapper, BookMapper>();
+            services.AddTransient<IDeleteBookCommand, DeleteBookCommand>();
+            services.AddTransient<IPostBookCommand, PostBookCommand>();
+            services.AddTransient<IGetBookCommand, GetBookCommand>();
+            services.AddTransient<IPutBookCommand, PutBookCommand>();
+        }
+
+        private void ConfigureMassTransit(IServiceCollection services)
+        {
+            services.AddMassTransit(x =>
             {
-                endpoints.MapControllers();
+                x.AddConsumer<BookConsumer>();
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host("localhost", "/", host =>
+                    {
+                        host.Username("service2");
+                        host.Password("service2");
+                    });
+
+                    cfg.ReceiveEndpoint("Book", ep => { ep.ConfigureConsumer<BookConsumer>(context); });
+                });
             });
+
+            services.AddMassTransitHostedService();
         }
     }
 }

@@ -5,19 +5,20 @@ using Models;
 
 namespace DataAccess.Commands
 {
-    public class DeleteBookCommand : IDeleteBookCommand
+    public class PutBookCommand : IPutBookCommand
     {
-        public OperationResult<BookResponse> Execute(int id)
+        public OperationResult<BookResponse> Execute(Book book)
         {
             try
             {
-                DataBase.Books.RemoveAt(DataBase.Books.FindIndex(x => x.Id == id));
+                DataBase.Books[DataBase.Books.FindIndex(x => x.Id == book?.Id)] = book;
+
                 return new OperationResult<BookResponse>()
                 {
                     IsSuccess = true
                 };
             }
-            catch (ArgumentOutOfRangeException exc)
+            catch (Exception exc)
             {
                 return new OperationResult<BookResponse>()
                 {

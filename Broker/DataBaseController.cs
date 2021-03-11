@@ -1,9 +1,9 @@
-using System;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Broker.Commands;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Models.Enums;
 
 namespace Broker
 {
@@ -11,37 +11,52 @@ namespace Broker
     [Route("[controller]")]
     public class DataBaseController : ControllerBase
     {
-        private static readonly HttpClient BookDbClient = new()
-        {
-            BaseAddress = new Uri("http://localhost:9000/book/")
-        };
-        
         [HttpGet("book/get")]
-        public async Task<string> GetBook([FromQuery] int id)
+        public async Task<OperationResult<BookResponse>> GetBook(
+            [FromServices] IRequestClient<BookRequest> client,
+            [FromServices] IRabbitRequestCommand<BookResponse, BookRequest> command,
+            [FromQuery] int id)
         {
-            var requestUri = $"get?id={id}";
-            return await BookDbClient.GetStringAsync(requestUri);
+            var request = new BookRequest()
+            {
+                Id = id,
+                Mode = RequestMode.Get
+            };
+            return await command.Execute(client, request);
         }
 
-        [HttpPost("book/create")]
-        public async void CreateBook([FromBody] JsonElement strJson)
+        [HttpPost("book/post")]
+        public async Task<OperationResult<BookResponse>> PostBook(
+            [FromServices] IRequestClient<BookRequest> client,
+            [FromServices] IRabbitRequestCommand<BookResponse, BookRequest> command,
+            [FromBody] Book book
+        )
         {
-            const string requestUri = "create";
-            await BookDbClient.PostAsJsonAsync(requestUri, strJson);
+            var request = new BookRequest() {ModelBody = book, Mode = RequestMode.Post};
+
+            return await command.Execute(client, request);
         }
-        
-        [HttpPatch("book/update")]
-        public async void UpdateBook([FromBody] JsonElement strJson)
+
+        [HttpPut("book/put")]
+        public async Task<OperationResult<BookResponse>> PutBook(
+            [FromServices] IRequestClient<BookRequest> client,
+            [FromServices] IRabbitRequestCommand<BookResponse, BookRequest> command,
+            [FromBody] Book book)
         {
-            const string requestUri = "update";
-            await BookDbClient.PatchAsync(requestUri, JsonContent.Create(strJson));
+            var request = new BookRequest() {ModelBody = book, Mode = RequestMode.Put};
+
+            return await command.Execute(client, request);
         }
-        
+
         [HttpDelete("book/delete")]
-        public async void DeleteBook([FromQuery] int id)
+        public async Task<OperationResult<BookResponse>> DeleteBook(
+            [FromServices] IRequestClient<BookRequest> client,
+            [FromServices] IRabbitRequestCommand<BookResponse, BookRequest> command,
+            [FromQuery] int id)
         {
-            string requestUri = $"delete?id={id}";
-            await BookDbClient.DeleteAsync(requestUri);
-        } 
+            var request = new BookRequest() {Id = id, Mode = RequestMode.Delete};
+
+            return await command.Execute(client, request);
+        }
     }
 }

@@ -2,7 +2,7 @@ using Models;
 
 namespace DataAccess.Commands.Interfaces
 {
-    public interface IPostBookCommand
+    public interface IPutBookCommand
     {
         public OperationResult<BookResponse> Execute(Book book);
     }

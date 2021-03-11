@@ -1,9 +1,11 @@
-using DataAccess.Entity;
+using DataAccess.Mapper;
+using Microsoft.AspNetCore.Mvc;
+using Models;
 
 namespace DataAccess.Commands.Interfaces
 {
     public interface IGetBookCommand
     {
-        public Book Execute(int id);
+        public OperationResult<BookResponse> Execute([FromServices] IBookMapper mapper, int id);
     }
 }

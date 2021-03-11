@@ -1,20 +1,16 @@
+using System;
+using Broker.Commands;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Models;
 
 namespace Broker
 {
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllers();
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -28,10 +24,36 @@ namespace Broker
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers();
+            ConfigureMassTransit(services);
+            services.AddTransient<
+                IRabbitRequestCommand<BookResponse, BookRequest>,
+                RabbitRequestCommand<BookResponse, BookRequest>
+            >();
+        }
+
+        private void ConfigureMassTransit(IServiceCollection services)
+        {
+            services.AddMassTransit(x =>
             {
-                endpoints.MapControllers();
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host("localhost", "/", host =>
+                    {
+                        host.Username("service1");
+                        host.Password("service1");
+                    });
+                });
+
+                x.AddRequestClient<BookRequest>(new Uri("rabbitmq://localhost/Book"));
             });
+
+            services.AddMassTransitHostedService();
         }
     }
 }

@@ -1,26 +1,38 @@
 using System;
 using DataAccess.Commands.Interfaces;
 using DataAccess.DataBases;
-using DataAccess.Entity;
+using DataAccess.Mapper;
+using Microsoft.AspNetCore.Mvc;
+using Models;
 
 namespace DataAccess.Commands
 {
     public class GetBookCommand : IGetBookCommand
     {
-        public Book Execute(int id)
+        public OperationResult<BookResponse> Execute(
+            [FromServices] IBookMapper mapper,
+            int id)
         {
             Book book = DataBase.Books.Find(x => x.Id == id);
             try
             {
                 if (book == null)
                     throw new ArgumentException("Incorrect id");
+
+                return new OperationResult<BookResponse>()
+                {
+                    IsSuccess = true,
+                    Body = mapper.Map(book)
+                };
             }
             catch (ArgumentException exc)
             {
-                Console.WriteLine(exc.Message);
+                return new OperationResult<BookResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessages = {exc.Message}
+                };
             }
-
-            return book;
         }
     }
 }

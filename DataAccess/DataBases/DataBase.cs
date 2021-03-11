@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using DataAccess.Entity;
+using Models;
 
 namespace DataAccess.DataBases
 {
