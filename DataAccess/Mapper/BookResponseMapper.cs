@@ -1,18 +1,19 @@
 using System.Diagnostics.CodeAnalysis;
 using Models;
+using Models.DataBase;
 
 namespace DataAccess.Mapper
 {
-    public class BookMapper : IBookMapper
+    public class BookResponseMapper : IBookResponseMapper
     {
-        public BookResponse Map([NotNull] Book book)
+        public BookResponse Map([NotNull] DbBook book, DbAuthorBook authorBook)
         {
             return new BookResponse()
             {
                 Name = book.Name,
-                Author = book.Author,
                 Year = book.Year,
-                Description = book.Description
+                Description = book.Description,
+                Author = authorBook.Author
             };
         }
     }

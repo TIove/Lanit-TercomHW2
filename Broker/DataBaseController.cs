@@ -3,6 +3,7 @@ using Broker.Commands;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Models.DataBase;
 using Models.Enums;
 
 namespace Broker
@@ -22,6 +23,7 @@ namespace Broker
                 Id = id,
                 Mode = RequestMode.Get
             };
+            
             return await command.Execute(client, request);
         }
 
@@ -29,11 +31,10 @@ namespace Broker
         public async Task<OperationResult<BookResponse>> PostBook(
             [FromServices] IRequestClient<BookRequest> client,
             [FromServices] IRabbitRequestCommand<BookResponse, BookRequest> command,
-            [FromBody] Book book
+            [FromBody] BookRequest request
         )
         {
-            var request = new BookRequest() {ModelBody = book, Mode = RequestMode.Post};
-
+            request.Mode = RequestMode.Post;
             return await command.Execute(client, request);
         }
 
@@ -41,10 +42,9 @@ namespace Broker
         public async Task<OperationResult<BookResponse>> PutBook(
             [FromServices] IRequestClient<BookRequest> client,
             [FromServices] IRabbitRequestCommand<BookResponse, BookRequest> command,
-            [FromBody] Book book)
+            [FromBody] BookRequest request)
         {
-            var request = new BookRequest() {ModelBody = book, Mode = RequestMode.Put};
-
+            request.Mode = RequestMode.Put;
             return await command.Execute(client, request);
         }
 
