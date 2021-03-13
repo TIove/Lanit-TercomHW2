@@ -1,24 +1,49 @@
 using System;
+using System.Linq;
 using DataAccess.Commands.Interfaces;
 using DataAccess.DataBases;
+using DataAccess.Mapper;
+using MassTransit.Initializers.Variables;
+using Microsoft.AspNetCore.Mvc;
 using Models;
+using Models.DataBase;
 
 namespace DataAccess.Commands
 {
     public class PostBookCommand : IPostBookCommand
     {
-        public OperationResult<BookResponse> Execute(Book book)
+        private BooksDbContext _context;
+        private IDbBookMapper _bookMapper;
+        private IDbAuthorBookMapper _authorBookMapper;
+        public PostBookCommand(
+            [FromServices] BooksDbContext context,
+            [FromServices] IDbBookMapper dbBookMapper,
+            [FromServices] IDbAuthorBookMapper dbAuthorBookMapper)
+        {
+            _context = context;
+            _bookMapper = dbBookMapper;
+            _authorBookMapper = dbAuthorBookMapper;
+        }
+        public OperationResult<BookResponse> Execute(BookRequest book)
         {
             try
             {
-                if (DataBase.Books.Exists(x => x.Id == book?.Id))
-                    throw new ArgumentException("This Id already exists");
-                DataBase.Books.Add(book);
-
-                return new OperationResult<BookResponse>()
+                if (_context.Books.FirstOrDefault(x => x.Id == book.Id) == null)
                 {
-                    IsSuccess = true
-                };
+                    _context.Books.Add(_bookMapper.Map(book));
+                    _context.SaveChanges();
+                    _context.Authors.Add(_authorBookMapper.Map(book));
+                    _context.SaveChanges();
+
+                    return new OperationResult<BookResponse>()
+                    {
+                        IsSuccess = true
+                    };
+                }
+                else
+                {
+                    throw new ArgumentException("This id already exists");
+                }
             }
             catch (Exception exc)
             {
