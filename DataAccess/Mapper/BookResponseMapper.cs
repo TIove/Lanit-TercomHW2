@@ -13,7 +13,7 @@ namespace DataAccess.Mapper
                 Name = book.Name,
                 Year = book.Year,
                 Description = book.Description,
-                Author = authorBook.Author
+                Author = authorBook?.Author
             };
         }
     }

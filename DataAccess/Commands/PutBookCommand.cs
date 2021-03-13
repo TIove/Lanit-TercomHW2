@@ -11,29 +11,39 @@ namespace DataAccess.Commands
 {
     public class PutBookCommand : IPutBookCommand
     {
-        public OperationResult<BookResponse> Execute(
+        private BooksDbContext _context;
+        private IDbBookMapper _dbBookMapper;
+        private IDbAuthorBookMapper _dbAuthorBookMapper;
+        public PutBookCommand(
             [FromServices] BooksDbContext context,
             [FromServices] IDbBookMapper dbBookMapper,
-            [FromServices] IDbAuthorBookMapper dbAuthorBookMapper,
+            [FromServices] IDbAuthorBookMapper dbAuthorBookMapper)
+        {
+            _context = context;
+            _dbBookMapper = dbBookMapper;
+            _dbAuthorBookMapper = dbAuthorBookMapper;
+        }
+        
+        public OperationResult<BookResponse> Execute(
             BookRequest book)
         {
             try
             {
-                DbBook oldBook = context.Books.FirstOrDefault(x => x.Id == book.Id);
-                DbAuthorBook authorBook = context.Authors.FirstOrDefault(x => x.BookId == book.Id);
+                DbBook oldBook = _context.Books.FirstOrDefault(x => x.Id == book.Id);
+                DbAuthorBook authorBook = _context.Authors.FirstOrDefault(x => x.BookId == book.Id);
                 
                 if (oldBook == null)
                 {
                     throw new ArgumentException("Old model doesn't exist");
                 }
 
-                context.Books.Remove(oldBook);
-                context.Books.Add(dbBookMapper.Map(book));
+                _context.Books.Remove(oldBook);
+                _context.Books.Add(_dbBookMapper.Map(book));
                 if (authorBook != null)
-                    context.Authors.Remove(authorBook);
+                    _context.Authors.Remove(authorBook);
                 
-                context.Authors.Add(dbAuthorBookMapper.Map(book));
-                context.SaveChanges();
+                _context.Authors.Add(_dbAuthorBookMapper.Map(book));
+                _context.SaveChanges();
 
                 return new OperationResult<BookResponse>()
                 {

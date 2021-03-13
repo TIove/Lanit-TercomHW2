@@ -4,6 +4,7 @@ using DataAccess.Commands.Interfaces;
 using DataAccess.DataBases;
 using DataAccess.Mapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.DataBase;
 
@@ -11,13 +12,19 @@ namespace DataAccess.Commands
 {
     public class GetBookCommand : IGetBookCommand
     {
-        public OperationResult<BookResponse> Execute(
+        private IBookResponseMapper _responseMapper;
+        private BooksDbContext _bookDbContext;
+        public GetBookCommand(
             [FromServices] IBookResponseMapper responseMapper,
-            [FromServices] BooksDbContext booksDbContext,
-            int id)
+            [FromServices] BooksDbContext booksDbContext)
         {
-            DbBook book = booksDbContext.Books.FirstOrDefault(b => b.Id == id);
-            DbAuthorBook author = booksDbContext.Authors.FirstOrDefault(a => a.BookId == id);
+            _responseMapper = responseMapper;
+            _bookDbContext = booksDbContext;
+        }
+        public OperationResult<BookResponse> Execute(int id)
+        {
+            DbBook book = _bookDbContext.Books.FirstOrDefault(b => b.Id == id);
+            DbAuthorBook author = _bookDbContext.Authors.FirstOrDefault(a => a.BookId == id);
             
             try
             {
@@ -29,7 +36,7 @@ namespace DataAccess.Commands
                 return new OperationResult<BookResponse>()
                 {
                     IsSuccess = true,
-                    Body = responseMapper.Map(book, author)
+                    Body = _responseMapper.Map(book, author)
                 };
             }
             catch (ArgumentException exc)

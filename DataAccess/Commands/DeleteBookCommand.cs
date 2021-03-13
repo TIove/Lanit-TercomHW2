@@ -10,22 +10,27 @@ namespace DataAccess.Commands
 {
     public class DeleteBookCommand : IDeleteBookCommand
     {
-        public OperationResult<BookResponse> Execute([FromServices] BooksDbContext context, int id)
+        private BooksDbContext _context;
+        public DeleteBookCommand([FromServices] BooksDbContext context)
+        {
+            _context = context;
+        }
+        public OperationResult<BookResponse> Execute(int id)
         {
             try
             {
-                DbBook book = context.Books.FirstOrDefault(x => x.Id == id);
-                DbAuthorBook authorBook = context.Authors.FirstOrDefault(x => x.BookId == id);
+                DbBook book = _context.Books.FirstOrDefault(x => x.Id == id);
+                DbAuthorBook authorBook = _context.Authors.FirstOrDefault(x => x.BookId == id);
                 
                 
                 if (authorBook != null)
-                    context.Authors.Remove(authorBook);
-                context.SaveChanges();
+                    _context.Authors.Remove(authorBook);
+                _context.SaveChanges();
                 
                 if (book == null) 
                     throw new ArgumentException("Model doesn't exist");
-                context.Books.Remove(book);
-                context.SaveChanges();
+                _context.Books.Remove(book);
+                _context.SaveChanges();
 
                 return new OperationResult<BookResponse>()
                 {

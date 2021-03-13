@@ -22,13 +22,13 @@ namespace DataAccess.DataBases
             string connection = String.Empty;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                connection = "Server=localhost\\sqlexpress;Database=test;Trusted_Connection=True;";
+                connection = "Server=localhost\\sqlexpress;Database=Books;Trusted_Connection=True;";
             }
             else if (
                 RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
                 RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                connection = "Server=localhost;Database=t0;User=sa;Password=password123;Trusted_Connection=False;";
+                connection = "Server=localhost;Database=Books;User=sa;Password=password123;Trusted_Connection=False;";
             }
             
             optionsBuilder.UseSqlServer(connection);

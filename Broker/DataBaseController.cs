@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Broker.Commands;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Models;
-using Models.DataBase;
 using Models.Enums;
 
 namespace Broker
@@ -12,6 +12,14 @@ namespace Broker
     [Route("[controller]")]
     public class DataBaseController : ControllerBase
     {
+        private readonly ILogger<DataBaseController> _logger;
+        
+        public DataBaseController(
+            ILogger<DataBaseController> logger)
+        {
+            _logger = logger;
+        }
+        
         [HttpGet("book/get")]
         public async Task<OperationResult<BookResponse>> GetBook(
             [FromServices] IRequestClient<BookRequest> client,
@@ -23,8 +31,14 @@ namespace Broker
                 Id = id,
                 Mode = RequestMode.Get
             };
+            var result = await command.Execute(client, request);
             
-            return await command.Execute(client, request);
+            foreach (var it in result.ErrorMessages)
+            {
+                _logger.Log(LogLevel.Error, it);
+            }
+            
+            return result;
         }
 
         [HttpPost("book/post")]
@@ -35,7 +49,12 @@ namespace Broker
         )
         {
             request.Mode = RequestMode.Post;
-            return await command.Execute(client, request);
+            var result = await command.Execute(client, request);
+            foreach (var it in result.ErrorMessages)
+            {
+                _logger.Log(LogLevel.Error, it);
+            }
+            return result;
         }
 
         [HttpPut("book/put")]
@@ -45,7 +64,12 @@ namespace Broker
             [FromBody] BookRequest request)
         {
             request.Mode = RequestMode.Put;
-            return await command.Execute(client, request);
+            var result = await command.Execute(client, request);
+            foreach (var it in result.ErrorMessages)
+            {
+                _logger.Log(LogLevel.Error, it);
+            }
+            return result;
         }
 
         [HttpDelete("book/delete")]
@@ -55,8 +79,13 @@ namespace Broker
             [FromQuery] int id)
         {
             var request = new BookRequest() {Id = id, Mode = RequestMode.Delete};
-
-            return await command.Execute(client, request);
+            
+            var result = await command.Execute(client, request);
+            foreach (var it in result.ErrorMessages)
+            {
+                _logger.Log(LogLevel.Error, it);
+            }
+            return result;
         }
     }
 }

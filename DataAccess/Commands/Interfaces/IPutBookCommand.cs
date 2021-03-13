@@ -9,9 +9,6 @@ namespace DataAccess.Commands.Interfaces
     public interface IPutBookCommand
     {
         public OperationResult<BookResponse> Execute(
-            [FromServices] BooksDbContext context, 
-            [FromServices] IDbBookMapper dbBookMapper,
-            [FromServices] IDbAuthorBookMapper dbAuthorBookMapper,
             BookRequest book);
     }
 }

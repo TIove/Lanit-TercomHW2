@@ -6,6 +6,6 @@ namespace DataAccess.Commands.Interfaces
 {
     public interface IDeleteBookCommand
     {
-        public OperationResult<BookResponse> Execute([FromServices] BooksDbContext context,int id);
+        public OperationResult<BookResponse> Execute(int id);
     }
 }

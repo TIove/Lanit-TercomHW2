@@ -7,9 +7,6 @@ namespace DataAccess.Commands.Interfaces
 {
     public interface IGetBookCommand
     {
-        public OperationResult<BookResponse> Execute(
-            [FromServices] IBookResponseMapper responseMapper,
-            [FromServices] BooksDbContext context,
-            int id);
+        public OperationResult<BookResponse> Execute(int id);
     }
 }

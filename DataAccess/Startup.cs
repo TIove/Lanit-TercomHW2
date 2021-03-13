@@ -1,3 +1,5 @@
+using System.IO;
+using Broker.Logger;
 using DataAccess.Commands;
 using DataAccess.Commands.Interfaces;
 using DataAccess.DataBases;
@@ -8,12 +10,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace DataAccess
 {
     public class Startup
     {
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             UpdateDatabase(app);
             
@@ -29,6 +32,21 @@ namespace DataAccess
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "logger.txt");
+            File.Delete(logPath);
+            loggerFactory.AddFile(logPath);
+            var logger = loggerFactory.CreateLogger("FileLogger");
+            
+            app.Run(async (context) => 
+            {
+                logger.LogInformation("Processing request {0}", context.Request.Path);
+                logger.LogCritical("Processing request {0}", context.Request.Path);
+                logger.LogDebug("Processing request {0}", context.Request.Path);
+                logger.LogError("Processing request {0}", context.Request.Path);
+                logger.LogTrace("Processing request {0}", context.Request.Path);
+                logger.LogWarning("Processing request {0}", context.Request.Path);
+            });
         }
 
         public void ConfigureServices(IServiceCollection services)
